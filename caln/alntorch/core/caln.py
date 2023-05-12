@@ -53,7 +53,7 @@ class ConvolutionALNet(nn.Module):
 
         if backbone_output_size != 0:
             self._backbone_out_size = backbone_output_size
-        elif hasattr(last_module, "out_features"):
+        else:
             self._backbone_out_size = last_module.out_features
 
     def init_alns(self, **kwargs):
@@ -93,9 +93,7 @@ class ConvolutionALNet(nn.Module):
 
     def forward(self, x):
         x = self._backbone(x)
-        outputs = []
-        for i in range(self._output_size):
-            outputs.append(getattr(self, f"aln{i}")(x))
+        outputs = [getattr(self, f"aln{i}")(x) for i in range(self._output_size)]
         outputs = torch.stack(outputs, dim=1)
         return outputs.squeeze(-1)
 
@@ -110,11 +108,8 @@ class ConvolutionALNet(nn.Module):
 
         # The first time we call grow, we need to convert the target to binary
         if self._bin_targets is None:
-            self._bin_targets = {}
             self._inputs_targets = []
-            for i in range(self._output_size):
-                self._bin_targets[i] = []
-
+            self._bin_targets = {i: [] for i in range(self._output_size)}
             for inputs, target in loader:
                 self._inputs_targets.append(inputs)
                 target = get_bin_targets(target, self._output_size, -1, as_dict=True)

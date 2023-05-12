@@ -258,7 +258,7 @@ class ALNet(nn.Module):
 
     def visit_nodes(self, visitor: Callable[[AlnNodeArgs, AlnNodeArgs], None]):
         stack = [(None, self.root)]
-        while len(stack) > 0:
+        while stack:
             parent, child = stack.pop()
             visitor(parent, child)
             if not isinstance(child, Linear):
@@ -298,16 +298,16 @@ class ALNet(nn.Module):
             piece.adapt(inputs, actual, target, responsibilities, lr)
 
     def validate_compatible_linear_piece(self, node: Linear) -> bool:
-        if not node.input_features == self.input_features:
+        if node.input_features != self.input_features:
             raise ValueError(
                 f"Linear node input_features {node.input_features} "
                 f"must equal aln input_features {self.input_features}"
             )
-        if not node.dtype == self.dtype:
+        if node.dtype != self.dtype:
             raise ValueError(
                 f"Linear node dtype {node.dtype} must equal aln dtype {self.dtype}"
             )
-        if not node.device == self.device:
+        if node.device != self.device:
             raise ValueError(
                 f"Linear node device {node.device} must equal aln device {self.device}"
             )
@@ -335,7 +335,7 @@ class ALNet(nn.Module):
         # remove piece from existing parent
         replace_left_child = None
         if old_parent is not None:
-            replace_left_child = True if piece == old_parent.left else False
+            replace_left_child = piece == old_parent.left
             if replace_left_child:
                 del old_parent.left
             else:
@@ -360,11 +360,10 @@ class ALNet(nn.Module):
         if old_parent is None:
             del self.root
             self.root = new_parent
+        elif replace_left_child:
+            old_parent.left = new_parent
         else:
-            if replace_left_child:
-                old_parent.left = new_parent
-            else:
-                old_parent.right = new_parent
+            old_parent.right = new_parent
 
         return new_parent
 
@@ -471,7 +470,7 @@ class ALNet(nn.Module):
                 )
             )
 
-        if len(candidates) == 0:
+        if not candidates:
             return 0
 
         # sort candidates by rmse in descending order

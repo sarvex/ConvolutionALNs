@@ -41,13 +41,9 @@ def check_device(device="cpu", return_info=False):
 
         if not torch.cuda.is_available():
             raise ValueError("No Cuda device found.")
-        else:
-            if device_no > torch.cuda.device_count() - 1:
-                raise ValueError("GPU ID exeeds number of GPUs.")
+        if device_no > torch.cuda.device_count() - 1:
+            raise ValueError("GPU ID exeeds number of GPUs.")
     elif device != "cpu":
         raise ValueError(f"Invalid device name {device}.")
 
-    if return_info:
-        return device, device_info
-    else:
-        return device
+    return (device, device_info) if return_info else device

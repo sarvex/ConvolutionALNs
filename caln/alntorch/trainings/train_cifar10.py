@@ -245,7 +245,7 @@ if __name__ == "__main__":
     experiment_name = args.name
     args.logdir = os.path.join(args.logdir, args.name)
 
-    os.makedirs(args.logdir, exist_ok=True if args.name.upper() == "TEST" else False)
+    os.makedirs(args.logdir, exist_ok=args.name.upper() == "TEST")
     logger = TrainLogger(args.logger, **vars(args))
 
     n_epochs = args.epochs
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     scheduler_type = args.scheduler
 
     # It is possible to use this code for training other than ALN-based networks (refer to the docs)
-    is_aln = True if args.model == "CALN" else False
+    is_aln = args.model == "CALN"
 
     train_loader, test_loader, class_names = get_cifar10_loaders(
         path=args.cifar10_path,

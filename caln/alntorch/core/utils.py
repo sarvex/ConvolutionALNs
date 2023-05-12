@@ -52,7 +52,7 @@ class bcolors:
 
 
 def print_title(msg):
-    msg = "+++ " + msg + " +++"
+    msg = f"+++ {msg} +++"
     amsg = bcolors.OKBLUE + "\n{0}\n" + msg + "\n{0}" + bcolors.NORM
     amsg = amsg.format("=" * len(msg))
     if amsg.find("\t") > -1:
@@ -103,9 +103,7 @@ def get_current_dir():
 
 
 def count_subfolders(folder):
-    if not os.path.isdir(folder):
-        return 0
-    return len(os.listdir(folder))
+    return 0 if not os.path.isdir(folder) else len(os.listdir(folder))
 
 
 def subdirs(path):
